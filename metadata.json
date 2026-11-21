@@ -1,0 +1,6 @@
+{
+  "name": "Video Editing Craft Studio",
+  "description": "Professional video editing portfolio and interactive custom pricing calculator app.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
