@@ -22,7 +22,6 @@
     background-color: var(--fc-bg);
     color: var(--fc-white);
     font-family: var(--font-sans);
-    direction: rtl;
   }
 
   body {

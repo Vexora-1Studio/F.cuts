@@ -7,24 +7,16 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Services from './components/Services';
 import Portfolio from './components/Portfolio';
-import AIShowcase from './components/AIShowcase';
 import About from './components/About';
-import Contact from './components/Contact';
 import Footer from './components/Footer';
+import { useLanguage } from './context/LanguageContext';
 
 export default function App() {
+  const { dir } = useLanguage();
   const [activeSection, setActiveSection] = useState('hero');
-  const [preSelectedPackage, setPreSelectedPackage] = useState('');
 
   useEffect(() => {
-    const sections = [
-      'hero',
-      'services',
-      'portfolio',
-      'ai-showcase',
-      'about',
-      'contact',
-    ];
+    const sections = ['hero', 'services', 'portfolio', 'about'];
 
     const handleScroll = () => {
       const scrollPos = window.scrollY + 240;
@@ -49,32 +41,20 @@ export default function App() {
     const targetElement = document.getElementById(sectionId);
     if (targetElement) {
       targetElement.scrollIntoView({ behavior: 'smooth' });
-      setActiveSection(sectionId);
+      if (sectionId !== 'footer') {
+        setActiveSection(sectionId);
+      }
     }
   };
 
   const handleContactNavigate = () => {
-    setPreSelectedPackage('');
-    handleNavigate('contact');
-    setTimeout(() => {
-      document.getElementById('contact-name-input')?.focus({ preventScroll: true });
-    }, 550);
-  };
-
-  const handleSelectOption = (selectionLabel?: string) => {
-    if (selectionLabel) {
-      setPreSelectedPackage(selectionLabel);
-    } else {
-      setPreSelectedPackage('');
-    }
-    setTimeout(() => {
-      handleNavigate('contact');
-    }, 50);
+    handleNavigate('footer');
   };
 
   return (
     <div
       id="app-root-container"
+      dir={dir}
       className="min-h-screen bg-[#050505] text-white overflow-x-hidden selection:bg-[#00E5FF] selection:text-[#050505] relative"
     >
       {/* Non-blocking Cinematic Studio Preloader */}
@@ -100,30 +80,16 @@ export default function App() {
         />
 
         <Services
-          onSelectOption={(serviceTitle) =>
-            serviceTitle
-              ? handleSelectOption(`طلب خدمة: ${serviceTitle}`)
-              : handleContactNavigate()
-          }
+          onSelectOption={handleContactNavigate}
           onContact={handleContactNavigate}
         />
 
         <Portfolio
-          onOrderSimilar={(category) => handleSelectOption(`مشابه لـ [ ${category} ]`)}
-          onContact={handleContactNavigate}
-        />
-
-        <AIShowcase
-          onRequestAIProject={(projectTitle) => handleSelectOption(projectTitle)}
+          onOrderSimilar={handleContactNavigate}
           onContact={handleContactNavigate}
         />
 
         <About onContact={handleContactNavigate} />
-
-        <Contact
-          preSelectedPackage={preSelectedPackage}
-          clearPreSelection={() => setPreSelectedPackage('')}
-        />
       </main>
 
       <Footer onNavigate={handleNavigate} />

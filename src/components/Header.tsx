@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Globe } from 'lucide-react';
 import { contactInfo } from '../data';
+import { useLanguage } from '../context/LanguageContext';
 import MagneticButton from './MagneticButton';
 
 interface HeaderProps {
@@ -10,6 +11,7 @@ interface HeaderProps {
 }
 
 export default function Header({ activeSection, onNavigate }: HeaderProps) {
+  const { language, dir, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -31,12 +33,10 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
   }, [isOpen]);
 
   const navItems = [
-    { id: 'hero', label: 'Home' },
-    { id: 'services', label: 'Services' },
-    { id: 'portfolio', label: 'Portfolio' },
-    { id: 'ai-showcase', label: 'AI Showcase' },
-    { id: 'about', label: 'About' },
-    { id: 'contact', label: 'Contact' },
+    { id: 'hero', label: t.header.nav.hero },
+    { id: 'services', label: t.header.nav.services },
+    { id: 'portfolio', label: t.header.nav.portfolio },
+    { id: 'about', label: t.header.nav.about },
   ];
 
   const handleItemClick = (id: string) => {
@@ -44,10 +44,49 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
     setIsOpen(false);
   };
 
+  const renderLanguageSwitch = (variant: 'desktop' | 'mobile') => (
+    <div
+      dir="ltr"
+      role="group"
+      aria-label={t.header.languageLabel}
+      className="inline-flex items-center rounded-xl bg-[#0b0c10] border border-white/15 p-0.5 shrink-0"
+    >
+      <Globe className="w-3.5 h-3.5 text-neutral-400 ms-2 me-1 hidden sm:block shrink-0" aria-hidden="true" />
+      <button
+        id={`lang-toggle-ar-${variant}`}
+        type="button"
+        onClick={() => setLanguage('ar')}
+        aria-pressed={language === 'ar'}
+        aria-label={t.header.switchToArabic}
+        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors duration-150 cursor-pointer whitespace-nowrap ${
+          language === 'ar'
+            ? 'bg-[#00E5FF] text-[#050505]'
+            : 'text-neutral-400 hover:text-white'
+        }`}
+      >
+        عربي
+      </button>
+      <button
+        id={`lang-toggle-en-${variant}`}
+        type="button"
+        onClick={() => setLanguage('en')}
+        aria-pressed={language === 'en'}
+        aria-label={t.header.switchToEnglish}
+        className={`px-2.5 py-1.5 rounded-lg font-mono text-[11px] font-bold transition-colors duration-150 cursor-pointer whitespace-nowrap ${
+          language === 'en'
+            ? 'bg-[#00E5FF] text-[#050505]'
+            : 'text-neutral-400 hover:text-white'
+        }`}
+      >
+        EN
+      </button>
+    </div>
+  );
+
   return (
     <header
       id="header-app"
-      dir="ltr"
+      dir={dir}
       className="fixed top-3 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none"
     >
       <div
@@ -57,11 +96,12 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
             : 'bg-[#050505]/70 border-white/10'
         }`}
       >
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
           {/* Zone 1: Brand F Logo + Wordmark */}
           <button
             type="button"
             id="brand-logo"
+            dir="ltr"
             onClick={() => handleItemClick('hero')}
             className="flex items-center gap-2.5 cursor-pointer shrink-0 group focus:outline-none"
           >
@@ -76,7 +116,11 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
           </button>
 
           {/* Zone 2: Minimal Floating Navigation */}
-          <nav id="desktop-nav" aria-label="Primary Navigation" className="hidden lg:flex items-center gap-1">
+          <nav
+            id="desktop-nav"
+            aria-label={t.header.navAriaLabel}
+            className="hidden lg:flex items-center gap-1"
+          >
             {navItems.map((item) => {
               const isActive = activeSection === item.id;
               return (
@@ -102,23 +146,25 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
             })}
           </nav>
 
-          {/* Zone 3: Single Primary Action */}
-          <div className="hidden lg:flex items-center shrink-0">
+          {/* Zone 3: Language Switcher + Primary Action */}
+          <div className="hidden lg:flex items-center gap-2.5 shrink-0">
+            {renderLanguageSwitch('desktop')}
             <MagneticButton
               id="cta-nav-button"
-              onClick={() => handleItemClick('contact')}
+              onClick={() => handleItemClick('footer')}
               className="px-4 py-2 rounded-lg bg-[#00E5FF] text-[#050505] text-xs font-extrabold tracking-wide hover:bg-white transition-colors duration-150 cursor-pointer whitespace-nowrap shrink-0"
             >
-              START A PROJECT
+              {t.header.cta}
             </MagneticButton>
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <div className="lg:hidden shrink-0">
+          {/* Mobile Controls: Language Switcher + Menu Toggle */}
+          <div className="lg:hidden flex items-center gap-2 shrink-0">
+            {renderLanguageSwitch('mobile')}
             <button
               id="mobile-menu-toggle"
               type="button"
-              aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-label={isOpen ? t.header.closeMenu : t.header.openMenu}
               aria-expanded={isOpen}
               onClick={() => setIsOpen(!isOpen)}
               className="w-11 h-11 flex items-center justify-center rounded-xl border border-white/15 bg-[#0b0c10] text-white hover:border-[#00E5FF] transition-colors cursor-pointer"
@@ -149,7 +195,7 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
                     key={item.id}
                     type="button"
                     onClick={() => handleItemClick(item.id)}
-                    className={`min-h-[48px] px-4 rounded-xl text-sm font-bold text-left transition-colors cursor-pointer ${
+                    className={`min-h-[48px] px-4 rounded-xl text-sm font-bold text-start transition-colors cursor-pointer ${
                       isActive
                         ? 'bg-white/10 text-[#00E5FF] border border-[#00E5FF]/40'
                         : 'text-neutral-300 hover:bg-white/5 hover:text-white'
@@ -162,10 +208,10 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
               <button
                 id="mobile-cta-button"
                 type="button"
-                onClick={() => handleItemClick('contact')}
+                onClick={() => handleItemClick('footer')}
                 className="mt-2 min-h-[48px] px-4 rounded-xl bg-[#00E5FF] text-[#050505] text-sm font-extrabold text-center hover:bg-white transition-colors cursor-pointer"
               >
-                START A PROJECT
+                {t.header.cta}
               </button>
             </div>
           </motion.div>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'motion/react';
-import { ArrowUpLeft, Check, X } from 'lucide-react';
+import { ArrowUpLeft, ArrowUpRight, Check, X } from 'lucide-react';
 import { services } from '../data';
 import { Service } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 import ScrollReveal from './ScrollReveal';
 import MagneticButton from './MagneticButton';
 import SectionContactCTA from './SectionContactCTA';
@@ -163,6 +164,7 @@ function ServiceVisualTreatment({
 }
 
 export default function Services({ onSelectOption, onContact }: ServicesProps) {
+  const { language, isRTL, t } = useLanguage();
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReduced = useReducedMotion();
@@ -187,30 +189,35 @@ export default function Services({ onSelectOption, onContact }: ServicesProps) {
     };
   }, [selectedService]);
 
+  const DirectionalArrow = isRTL ? ArrowUpLeft : ArrowUpRight;
+
   return (
     <section ref={sectionRef} id="services" className="py-24 border-b border-white/10 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-right">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-start">
         {/* Editorial Section Header with Smooth Parallax */}
         <motion.div style={{ y: headerParallaxY }}>
           <ScrollReveal variant="curtain">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
               <div className="max-w-3xl">
                 <p dir="ltr" className="font-mono text-xs font-bold tracking-[0.2em] text-[#00E5FF] uppercase mb-3">
-                  01 · CREATIVE SERVICES
+                  {t.services.eyebrow}
                 </p>
                 <h2
                   className="font-display font-extrabold text-3xl sm:text-5xl text-white mb-4 tracking-tight leading-[1.1]"
                   style={{ textWrap: 'balance' }}
                 >
-                  خدمات إنتاج بصري بمستوى <span dir="ltr" className="text-[#FF168B] inline-block">f.cuts</span>
+                  {t.services.headingPrefix}{' '}
+                  <span dir="ltr" className="text-[#FF168B] inline-block">
+                    f.cuts
+                  </span>
+                  {t.services.headingSuffix ? ` ${t.services.headingSuffix}` : ''}
                 </h2>
                 <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
-                  خمس مسارات إبداعية متكاملة تجمع بين دقة المونتاج، سحر الألوان، وتوليد المحتوى بالذكاء
-                  الاصطناعي. اضغط على أي خدمة لاستعراض التفاصيل الكاملة.
+                  {t.services.subtitle}
                 </p>
               </div>
-              <span dir="ltr" className="font-mono text-xs text-neutral-400">
-                CLICK ANY CARD FOR BREAKDOWN
+              <span className="font-mono text-xs text-neutral-400">
+                {t.services.hint}
               </span>
             </div>
           </ScrollReveal>
@@ -220,6 +227,10 @@ export default function Services({ onSelectOption, onContact }: ServicesProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
           {services.map((service, idx) => {
             const isCyan = service.accent === 'cyan';
+            const localizedTitle = language === 'ar' ? service.title : service.titleEn;
+            const localizedDesc = language === 'ar' ? service.description : service.descriptionEn;
+            const localizedFeatures = language === 'ar' ? service.features : service.featuresEn;
+
             return (
               <ScrollReveal
                 key={service.id}
@@ -258,30 +269,30 @@ export default function Services({ onSelectOption, onContact }: ServicesProps) {
                       >
                         {service.number}. {service.shortTag}
                       </span>
-                      <ArrowUpLeft className="w-4 h-4 text-neutral-400 group-hover:text-white transition-colors" />
+                      <DirectionalArrow className="w-4 h-4 text-neutral-400 group-hover:text-white transition-colors" />
                     </div>
 
                     <ServiceVisualTreatment type={service.visualType} accent={service.accent} />
 
                     <h3
                       dir="ltr"
-                      className="font-display font-extrabold text-xl sm:text-2xl text-white mb-1 text-left group-hover:text-[#00E5FF] transition-colors"
+                      className="font-display font-extrabold text-xl sm:text-2xl text-white mb-1 text-start group-hover:text-[#00E5FF] transition-colors"
                     >
                       {service.englishTitle}
                     </h3>
-                    <p className="text-sm font-bold text-neutral-200 mb-3">{service.title}</p>
+                    <p className="text-sm font-bold text-neutral-200 mb-3">{localizedTitle}</p>
 
                     <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mb-6">
-                      {service.description}
+                      {localizedDesc}
                     </p>
                   </div>
 
                   <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs">
                     <span className="text-neutral-400 font-semibold">
-                      {service.features.length} مسارات تنفيذية
+                      {localizedFeatures.length} {t.services.tracksCountSuffix}
                     </span>
                     <span className={isCyan ? 'text-[#00E5FF] font-bold' : 'text-[#FF168B] font-bold'}>
-                      استعراض الخدمة
+                      {t.services.exploreCard}
                     </span>
                   </div>
                 </motion.article>
@@ -293,7 +304,7 @@ export default function Services({ onSelectOption, onContact }: ServicesProps) {
         {/* Unified Section Contact CTA */}
         <SectionContactCTA
           onContact={onContact}
-          promptText="هل لديك مشروع جاهز وتبحث عن مسار مونتاج وإخراج يترك أثراً حقيقياً؟"
+          promptText={t.services.ctaPrompt}
         />
       </div>
 
@@ -316,29 +327,31 @@ export default function Services({ onSelectOption, onContact }: ServicesProps) {
               exit={{ opacity: 0, scale: 0.96, y: 14 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-[#0b0c10] w-full max-w-3xl rounded-2xl border border-white/15 p-6 sm:p-9 text-right fcuts-card-glow max-h-[90vh] overflow-y-auto"
+              className="relative bg-[#0b0c10] w-full max-w-3xl rounded-2xl border border-white/15 p-6 sm:p-9 text-start fcuts-card-glow max-h-[90vh] overflow-y-auto"
             >
               <button
                 type="button"
-                aria-label="إغلاق تفاصيل الخدمة"
+                aria-label={t.services.modal.closeLabel}
                 onClick={() => setSelectedService(null)}
-                className="absolute top-5 left-5 w-10 h-10 rounded-lg border border-white/15 bg-[#050505] text-white hover:border-[#00E5FF] hover:text-[#00E5FF] flex items-center justify-center cursor-pointer transition-colors"
+                className="absolute top-5 end-5 w-10 h-10 rounded-lg border border-white/15 bg-[#050505] text-white hover:border-[#00E5FF] hover:text-[#00E5FF] flex items-center justify-center cursor-pointer transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <p dir="ltr" className="font-mono text-xs font-bold text-[#00E5FF] mb-2 text-left">
+              <p dir="ltr" className="font-mono text-xs font-bold text-[#00E5FF] mb-2 text-start">
                 {selectedService.number} · {selectedService.shortTag}
               </p>
 
               <h3
                 id="service-modal-title"
                 dir="ltr"
-                className="font-display font-extrabold text-2xl sm:text-3xl text-white mb-1 text-left"
+                className="font-display font-extrabold text-2xl sm:text-3xl text-white mb-1 text-start"
               >
                 {selectedService.englishTitle}
               </h3>
-              <p className="text-base font-bold text-[#FF168B] mb-5">{selectedService.title}</p>
+              <p className="text-base font-bold text-[#FF168B] mb-5">
+                {language === 'ar' ? selectedService.title : selectedService.titleEn}
+              </p>
 
               <ServiceVisualTreatment
                 type={selectedService.visualType}
@@ -346,14 +359,14 @@ export default function Services({ onSelectOption, onContact }: ServicesProps) {
               />
 
               <p className="text-sm sm:text-base text-neutral-300 leading-relaxed mb-7">
-                {selectedService.description}
+                {language === 'ar' ? selectedService.description : selectedService.descriptionEn}
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-[#050505] border border-white/10 rounded-xl p-5">
-                  <h4 className="text-xs font-bold text-[#00E5FF] mb-3">نطاق التنفيذ</h4>
+                  <h4 className="text-xs font-bold text-[#00E5FF] mb-3">{t.services.modal.scopeTitle}</h4>
                   <ul className="space-y-2.5">
-                    {selectedService.features.map((feat, i) => (
+                    {(language === 'ar' ? selectedService.features : selectedService.featuresEn).map((feat, i) => (
                       <li key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-200">
                         <Check className="w-4 h-4 text-[#00E5FF] shrink-0 mt-0.5" />
                         <span>{feat}</span>
@@ -363,9 +376,9 @@ export default function Services({ onSelectOption, onContact }: ServicesProps) {
                 </div>
 
                 <div className="bg-[#050505] border border-white/10 rounded-xl p-5">
-                  <h4 className="text-xs font-bold text-[#FF168B] mb-3">المخرجات النهائية</h4>
+                  <h4 className="text-xs font-bold text-[#FF168B] mb-3">{t.services.modal.deliverablesTitle}</h4>
                   <ul className="space-y-2.5">
-                    {selectedService.deliverables.map((del, i) => (
+                    {(language === 'ar' ? selectedService.deliverables : selectedService.deliverablesEn).map((del, i) => (
                       <li key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-200">
                         <Check className="w-4 h-4 text-[#FF168B] shrink-0 mt-0.5" />
                         <span>{del}</span>
@@ -378,13 +391,14 @@ export default function Services({ onSelectOption, onContact }: ServicesProps) {
               <div className="flex justify-end">
                 <MagneticButton
                   onClick={() => {
-                    const title = `${selectedService.englishTitle} — ${selectedService.title}`;
+                    const localized = language === 'ar' ? selectedService.title : selectedService.titleEn;
+                    const title = `${selectedService.englishTitle} — ${localized}`;
                     setSelectedService(null);
                     onSelectOption(title);
                   }}
                   className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#00E5FF] text-[#050505] font-extrabold text-sm hover:bg-white transition-colors cursor-pointer"
                 >
-                  ابدأ مشروعك بهذه الخدمة
+                  {t.services.modal.startWithService}
                 </MagneticButton>
               </div>
             </motion.div>

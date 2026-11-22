@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion, useScroll, useSpring, useReducedMotion } from 'motion/react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ScrollProgressBar() {
+  const { isRTL } = useLanguage();
   const { scrollYProgress } = useScroll();
   const shouldReduceMotion = useReducedMotion();
   const scaleX = useSpring(scrollYProgress, {
@@ -18,7 +20,7 @@ export default function ScrollProgressBar() {
       <motion.div
         style={{
           scaleX: shouldReduceMotion ? scrollYProgress : scaleX,
-          transformOrigin: '0% 50%',
+          transformOrigin: isRTL ? '100% 50%' : '0% 50%',
         }}
         className="w-full h-full bg-gradient-to-r from-[#00E5FF] via-white to-[#FF168B]"
       />

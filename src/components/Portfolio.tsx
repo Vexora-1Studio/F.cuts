@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } fr
 import { Play, Clock, User, Calendar, X, ExternalLink, Film, ChevronLeft, ChevronRight } from 'lucide-react';
 import { portfolioItems } from '../data';
 import { PortfolioItem } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 import ProceduralThumbnail from './ProceduralThumbnail';
 import ScrollReveal from './ScrollReveal';
 import MagneticButton from './MagneticButton';
@@ -14,6 +15,7 @@ interface PortfolioProps {
 }
 
 export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps) {
+  const { language, isRTL, t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReduced = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -29,10 +31,10 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
   const [lightboxVideoError, setLightboxVideoError] = useState(false);
 
   const categories = [
-    { id: 'all', label: 'الكل' },
-    { id: 'youtube', label: 'فيديوهات يوتيوب' },
-    { id: 'commercial', label: 'إعلانات تجارية' },
-    { id: 'shorts', label: 'فيديوهات قصيرة' },
+    { id: 'all', label: t.portfolio.categories.all },
+    { id: 'youtube', label: t.portfolio.categories.youtube },
+    { id: 'commercial', label: t.portfolio.categories.commercial },
+    { id: 'shorts', label: t.portfolio.categories.shorts },
   ];
 
   const filteredItems =
@@ -43,13 +45,13 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
   const getCategoryLabel = (cat: string) => {
     switch (cat) {
       case 'youtube':
-        return 'يوتيوب';
+        return t.portfolio.categoryLabels.youtube;
       case 'commercial':
-        return 'إعلان تجاري';
+        return t.portfolio.categoryLabels.commercial;
       case 'shorts':
-        return 'فيديوهات قصيرة';
+        return t.portfolio.categoryLabels.shorts;
       default:
-        return 'مونتاج مخصص';
+        return t.portfolio.categoryLabels.default;
     }
   };
 
@@ -80,24 +82,27 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
     document.body.style.overflow = 'hidden';
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleCloseLightbox();
-      if (e.key === 'ArrowRight') handleCycleItem('prev');
-      if (e.key === 'ArrowLeft') handleCycleItem('next');
+      if (e.key === 'ArrowRight') handleCycleItem(isRTL ? 'prev' : 'next');
+      if (e.key === 'ArrowLeft') handleCycleItem(isRTL ? 'next' : 'prev');
     };
     window.addEventListener('keydown', onKeyDown);
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [activeItem, filteredItems]);
+  }, [activeItem, filteredItems, isRTL]);
 
   const handleRequestSimilar = (cat: string) => {
     onOrderSimilar(getCategoryLabel(cat));
     handleCloseLightbox();
   };
 
+  const PrevIcon = isRTL ? ChevronRight : ChevronLeft;
+  const NextIcon = isRTL ? ChevronLeft : ChevronRight;
+
   return (
     <section ref={sectionRef} id="portfolio" className="py-24 border-b border-white/10 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-right">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-start">
         {/* Editorial Section Header with Smooth Parallax */}
         <motion.div style={{ y: headerParallaxY }}>
           <ScrollReveal variant="zoom">
@@ -108,22 +113,25 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                   className="font-mono text-xs font-bold tracking-[0.2em] text-[#00E5FF] uppercase mb-3 inline-flex items-center gap-2"
                 >
                   <Film className="w-3.5 h-3.5" />
-                  <span>02 · CINEMATIC PORTFOLIO · 2027</span>
+                  <span>{t.portfolio.eyebrow}</span>
                 </p>
                 <h2
                   className="font-display font-extrabold text-3xl sm:text-5xl text-white mb-4 tracking-tight leading-[1.1]"
                   style={{ textWrap: 'balance' }}
                 >
-                  نماذج عرض بهوية <span dir="ltr" className="text-[#00E5FF] inline-block">f.cuts</span> السينمائية
+                  {t.portfolio.headingPrefix}{' '}
+                  <span dir="ltr" className="text-[#00E5FF] inline-block">
+                    f.cuts
+                  </span>{' '}
+                  {t.portfolio.headingSuffix}
                 </h2>
                 <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
-                  مشاريع عرض تفاعلية تبرز إمكاناتنا في قوة السرد، دقة التقطيع، والمعالجة البصرية
-                  في اليوتيوب، الإعلانات، والمحتوى العمودي السريع.
+                  {t.portfolio.subtitle}
                 </p>
               </div>
 
-              <div dir="ltr" className="text-xs text-neutral-400 font-mono">
-                4K UHD · FULLSCREEN INTERACTIVE PLAYER
+              <div className="text-xs text-neutral-400 font-mono">
+                {t.portfolio.hint}
               </div>
             </div>
           </ScrollReveal>
@@ -167,6 +175,9 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
           <AnimatePresence mode="popLayout">
             {filteredItems.map((item, idx) => {
               const isLead = idx === 0 && filteredItems.length > 2;
+              const itemTitle = language === 'ar' ? item.title : item.titleEn;
+              const itemDesc = language === 'ar' ? item.description : item.descriptionEn;
+
               return (
                 <motion.article
                   layout
@@ -198,7 +209,7 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                     <div className="cinema-media-inner w-full h-full">
                       <ProceduralThumbnail
                         src={item.thumbnailUrl}
-                        alt={item.title}
+                        alt={itemTitle}
                         aspectLabel={item.englishTitle}
                       />
                     </div>
@@ -214,14 +225,14 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                     {/* Top Corner Monospace Label */}
                     <div
                       dir="ltr"
-                      className="absolute top-4 left-4 px-3 py-1.5 rounded-lg bg-[#050505]/90 border border-white/10 font-mono text-[11px] font-bold text-[#00E5FF]"
+                      className="absolute top-4 end-4 px-3 py-1.5 rounded-lg bg-[#050505]/90 border border-white/10 font-mono text-[11px] font-bold text-[#00E5FF]"
                     >
                       {item.duration}
                     </div>
                   </div>
 
                   {/* Card Content */}
-                  <div className="p-6 sm:p-8 text-right flex flex-col justify-between gap-5">
+                  <div className="p-6 sm:p-8 text-start flex flex-col justify-between gap-5">
                     <div>
                       <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
                         <div className="flex items-center gap-2 text-xs text-neutral-400">
@@ -239,10 +250,10 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                       </div>
 
                       <h3 className="font-display font-extrabold text-xl sm:text-2xl text-white mb-2 group-hover:text-[#00E5FF] transition-colors">
-                        {item.title}
+                        {itemTitle}
                       </h3>
                       <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed line-clamp-2 max-w-3xl">
-                        {item.description}
+                        {itemDesc}
                       </p>
                     </div>
 
@@ -251,7 +262,7 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                         {item.softwareUsed.join(' · ')}
                       </span>
                       <span className="text-[#FF168B] font-bold shrink-0 group-hover:text-white transition-colors">
-                        تشغيل ومعاينة كاملة
+                        {t.portfolio.playPreview}
                       </span>
                     </div>
                   </div>
@@ -264,13 +275,13 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
         {/* Empty state */}
         {filteredItems.length === 0 && (
           <div className="text-center py-16 bg-[#0b0c10] rounded-2xl border border-white/10">
-            <p className="text-neutral-300 font-bold mb-4">لا توجد مشاريع في هذا التصنيف حالياً</p>
+            <p className="text-neutral-300 font-bold mb-4">{t.portfolio.emptyState}</p>
             <button
               type="button"
               onClick={() => setSelectedCategory('all')}
               className="text-xs font-bold px-5 py-2.5 rounded-xl border border-white/15 bg-[#050505] hover:border-[#00E5FF] text-[#00E5FF] transition-colors cursor-pointer"
             >
-              عرض جميع الأعمال
+              {t.portfolio.showAllBtn}
             </button>
           </div>
         )}
@@ -278,7 +289,7 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
         {/* Unified Section Contact CTA */}
         <SectionContactCTA
           onContact={onContact}
-          promptText="هل أعجبك أحد الأساليب المعروضة وتريد تنفيذ مونتاج مشابه لمحتواك؟"
+          promptText={t.portfolio.ctaPrompt}
         />
       </div>
 
@@ -302,34 +313,34 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
               exit={{ opacity: 0, scale: 0.96, y: 12 }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-[#0b0c10] w-full max-w-5xl rounded-2xl border border-white/15 overflow-hidden text-right fcuts-card-glow max-h-[92vh] flex flex-col"
+              className="relative bg-[#0b0c10] w-full max-w-5xl rounded-2xl border border-white/15 overflow-hidden text-start fcuts-card-glow max-h-[92vh] flex flex-col"
             >
               {/* Modal Top Controls: Prev / Next / Close */}
-              <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+              <div className="absolute top-4 end-4 z-20 flex items-center gap-2">
                 {filteredItems.length > 1 && (
                   <>
                     <button
                       type="button"
-                      aria-label="المشروع السابق"
+                      aria-label={t.portfolio.modal.prevLabel}
                       onClick={() => handleCycleItem('prev')}
                       className="w-10 h-10 rounded-lg border border-white/15 hover:border-[#00E5FF] bg-[#050505] text-white hover:text-[#00E5FF] flex items-center justify-center cursor-pointer transition-colors"
                     >
-                      <ChevronRight className="w-5 h-5" />
+                      <PrevIcon className="w-5 h-5" />
                     </button>
                     <button
                       type="button"
-                      aria-label="المشروع التالي"
+                      aria-label={t.portfolio.modal.nextLabel}
                       onClick={() => handleCycleItem('next')}
                       className="w-10 h-10 rounded-lg border border-white/15 hover:border-[#00E5FF] bg-[#050505] text-white hover:text-[#00E5FF] flex items-center justify-center cursor-pointer transition-colors"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <NextIcon className="w-5 h-5" />
                     </button>
                   </>
                 )}
                 <button
                   id="close-lightbox-btn"
                   type="button"
-                  aria-label="إغلاق المعاينة"
+                  aria-label={t.portfolio.modal.closeLabel}
                   onClick={handleCloseLightbox}
                   className="w-10 h-10 rounded-lg border border-white/15 hover:border-[#FF168B] bg-[#050505] text-white hover:text-[#FF168B] flex items-center justify-center cursor-pointer transition-colors"
                 >
@@ -338,7 +349,7 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 overflow-y-auto">
-                <div className="lg:col-span-7 bg-[#050505] flex items-center justify-center aspect-video lg:aspect-auto lg:min-h-[440px] relative border-b lg:border-b-0 lg:border-l border-white/10">
+                <div className="lg:col-span-7 bg-[#050505] flex items-center justify-center aspect-video lg:aspect-auto lg:min-h-[440px] relative border-b lg:border-b-0 lg:border-e border-white/10">
                   {!lightboxVideoError ? (
                     <video
                       key={activeItem.id}
@@ -353,7 +364,7 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                   ) : (
                     <ProceduralThumbnail
                       src={activeItem.thumbnailUrl}
-                      alt={activeItem.title}
+                      alt={language === 'ar' ? activeItem.title : activeItem.titleEn}
                       aspectLabel={activeItem.englishTitle}
                     />
                   )}
@@ -372,17 +383,17 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                     </div>
 
                     {activeItem.englishTitle && (
-                      <p dir="ltr" className="font-mono text-xs text-[#FF168B] font-bold mb-1 text-left">
+                      <p dir="ltr" className="font-mono text-xs text-[#FF168B] font-bold mb-1 text-start">
                         {activeItem.englishTitle}
                       </p>
                     )}
 
                     <h3 id="lightbox-title" className="font-display font-black text-2xl text-white mb-3">
-                      {activeItem.title}
+                      {language === 'ar' ? activeItem.title : activeItem.titleEn}
                     </h3>
 
                     <p className="text-neutral-300 text-sm leading-relaxed mb-6">
-                      {activeItem.description}
+                      {language === 'ar' ? activeItem.description : activeItem.descriptionEn}
                     </p>
 
                     <div className="space-y-3.5 border-t border-white/10 pt-5 text-xs">
@@ -391,8 +402,10 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                           <User className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="text-neutral-500 font-semibold">النطاق</p>
-                          <p className="text-neutral-200 font-bold">{activeItem.client}</p>
+                          <p className="text-neutral-500 font-semibold">{t.portfolio.modal.scopeLabel}</p>
+                          <p className="text-neutral-200 font-bold">
+                            {language === 'ar' ? activeItem.client : activeItem.clientEn}
+                          </p>
                         </div>
                       </div>
 
@@ -401,7 +414,7 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                           <Calendar className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="text-neutral-500 font-semibold">الإصدار</p>
+                          <p className="text-neutral-500 font-semibold">{t.portfolio.modal.releaseLabel}</p>
                           <p className="text-neutral-200 font-bold">{activeItem.date}</p>
                         </div>
                       </div>
@@ -411,8 +424,8 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                           <Clock className="w-4 h-4" />
                         </div>
                         <div>
-                          <p className="text-neutral-500 font-semibold">مدة النموذج</p>
-                          <p dir="ltr" className="text-neutral-200 font-mono font-bold text-right tabular-nums">
+                          <p className="text-neutral-500 font-semibold">{t.portfolio.modal.durationLabel}</p>
+                          <p dir="ltr" className="text-neutral-200 font-mono font-bold text-start tabular-nums">
                             {activeItem.duration}
                           </p>
                         </div>
@@ -420,8 +433,8 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                     </div>
 
                     <div className="mt-6 pt-4 border-t border-white/10">
-                      <p className="text-xs text-neutral-400 mb-2 font-bold">الأدوات المستخدمة</p>
-                      <p dir="ltr" className="text-xs font-mono text-[#00E5FF] text-right">
+                      <p className="text-xs text-neutral-400 mb-2 font-bold">{t.portfolio.modal.toolsLabel}</p>
+                      <p dir="ltr" className="text-xs font-mono text-[#00E5FF] text-start">
                         {activeItem.softwareUsed.join(' · ')}
                       </p>
                     </div>
@@ -433,7 +446,7 @@ export default function Portfolio({ onOrderSimilar, onContact }: PortfolioProps)
                       onClick={() => handleRequestSimilar(activeItem.category)}
                       className="w-full py-3.5 rounded-xl bg-[#00E5FF] text-[#050505] font-extrabold hover:bg-white transition-colors duration-150 cursor-pointer flex items-center justify-center gap-2 text-sm"
                     >
-                      <span>اطلب مونتاجاً مشابهاً لمشروعك</span>
+                      <span>{t.portfolio.modal.orderSimilarBtn}</span>
                       <ExternalLink className="w-4 h-4" />
                     </MagneticButton>
                   </div>

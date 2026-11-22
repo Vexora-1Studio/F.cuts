@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'motion/react';
 import { Play, Pause, Volume2, VolumeX, ArrowDown, X, Film } from 'lucide-react';
 import { contactInfo } from '../data';
+import { useLanguage } from '../context/LanguageContext';
 import MagneticButton from './MagneticButton';
 import ProceduralThumbnail from './ProceduralThumbnail';
 
@@ -11,6 +12,7 @@ interface HeroProps {
 }
 
 export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
+  const { t, dir } = useLanguage();
   const heroRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -143,11 +145,11 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
             className="w-6 h-6 rounded object-contain border border-white/15"
           />
           <span dir="ltr" className="text-white font-bold tracking-widest">
-            F.CUTS STUDIO
+            {t.hero.studioTag}
           </span>
         </div>
         <span dir="ltr" className="tracking-widest text-[#00E5FF]">
-          CREATIVE POST-PRODUCTION · 2027
+          {t.hero.eraTag}
         </span>
       </div>
 
@@ -185,23 +187,30 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
             id="hero-first-word"
             className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] via-[#7CF2FF] to-[#FF168B]"
           >
-            WE
+            {t.hero.headlineFirstWord}
           </span>{' '}
-          DON&apos;T JUST EDIT.
+          {t.hero.headlinePart1}
           <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] via-white to-[#FF168B]">
-            WE CREATE IMPACT.
+            {t.hero.headlinePart2}
           </span>
         </motion.h1>
 
-        {/* Short Bilingual Studio Intro */}
+        {/* Localized Studio Intro */}
         <motion.p
           initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
           className="mt-7 max-w-2xl text-sm sm:text-base text-neutral-300 leading-relaxed font-medium bg-[#050505]/60 px-5 py-3.5 rounded-2xl border border-white/10"
         >
-          استوديو <span dir="ltr" className="text-white font-bold inline-block">f.cuts</span> للإخراج الرقمي والمونتاج الاحترافي — نجمع السرد السينمائي، تصميم فيديوهات{' '}
-          <span dir="ltr" className="text-[#00E5FF] font-semibold inline-block">Long Form</span>، وتقنيات الذكاء الاصطناعي لصناعة تجربة بصرية لا تُنسى.
+          {t.hero.introBeforeBrand ? `${t.hero.introBeforeBrand} ` : ''}
+          <span dir="ltr" className="text-white font-bold inline-block">
+            f.cuts
+          </span>{' '}
+          {t.hero.introAfterBrand}{' '}
+          <span dir="ltr" className="text-[#00E5FF] font-semibold inline-block">
+            Long Form
+          </span>
+          {t.hero.introAfterLongForm}
         </motion.p>
 
         {/* Premium Magnetic CTAs */}
@@ -209,7 +218,7 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
           initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          dir="ltr"
+          dir={dir}
           className="mt-8 flex flex-wrap items-center justify-center gap-4"
         >
           <MagneticButton
@@ -217,7 +226,7 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
             onClick={onExploreWork}
             className="min-h-[48px] px-7 py-3.5 rounded-xl bg-[#00E5FF] text-[#050505] text-xs sm:text-sm font-extrabold tracking-wider uppercase hover:bg-white transition-colors duration-150 cursor-pointer fcuts-cyan-glow whitespace-nowrap shrink-0"
           >
-            EXPLORE OUR WORK
+            {t.hero.exploreBtn}
           </MagneticButton>
 
           <MagneticButton
@@ -225,18 +234,19 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
             onClick={onStartProject}
             className="min-h-[48px] px-7 py-3.5 rounded-xl border border-[#FF168B] bg-[#050505]/85 text-white text-xs sm:text-sm font-extrabold tracking-wider uppercase hover:bg-[#FF168B] hover:text-white transition-colors duration-150 cursor-pointer fcuts-magenta-glow whitespace-nowrap shrink-0"
           >
-            START A PROJECT
+            {t.hero.startBtn}
           </MagneticButton>
 
           <button
             id="hero-showreel-trigger"
             type="button"
+            dir="ltr"
             data-cursor="play"
             onClick={() => setShowReelModal(true)}
             className="min-h-[48px] px-5 py-3.5 rounded-xl border border-white/15 bg-[#0b0c10]/85 text-neutral-200 hover:border-[#00E5FF] hover:text-[#00E5FF] text-xs font-bold tracking-wider uppercase transition-colors cursor-pointer inline-flex items-center gap-2 whitespace-nowrap shrink-0"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            <span>SHOWREEL 2027</span>
+            <span>{t.hero.showreelBtn}</span>
           </button>
         </motion.div>
       </motion.div>
@@ -246,17 +256,17 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-6 text-xs text-neutral-400">
           <div>
             <span dir="ltr" className="font-mono font-bold text-[#00E5FF]">4K UHD</span>
-            <span className="mr-2">معيار التصدير</span>
+            <span className="ms-2">{t.hero.disciplines.uhdLabel}</span>
           </div>
           <span aria-hidden="true" className="text-neutral-700">/</span>
           <div>
             <span dir="ltr" className="font-mono font-bold text-white">LONG FORM</span>
-            <span className="mr-2">تخصص سردي متكامل</span>
+            <span className="ms-2">{t.hero.disciplines.longFormLabel}</span>
           </div>
           <span aria-hidden="true" className="text-neutral-700">/</span>
           <div>
             <span dir="ltr" className="font-mono font-bold text-[#FF168B]">AI PIPELINE</span>
-            <span className="mr-2">إنتاج بصري حديث</span>
+            <span className="ms-2">{t.hero.disciplines.aiLabel}</span>
           </div>
         </div>
 
@@ -264,10 +274,9 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
         <button
           type="button"
           onClick={onExploreWork}
-          dir="ltr"
           className="inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.2em] text-neutral-400 hover:text-[#00E5FF] transition-colors cursor-pointer min-h-[44px]"
         >
-          <span>SCROLL TO EXPLORE</span>
+          <span>{t.hero.scrollToExplore}</span>
           <motion.span
             animate={shouldReduceMotion ? undefined : { y: [0, 6, 0] }}
             transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
@@ -289,7 +298,7 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
             onClick={closeReel}
             role="dialog"
             aria-modal="true"
-            aria-label="f.cuts 2027 Showreel"
+            aria-label={t.hero.showreelModal.dialogLabel}
             className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/92"
           >
             <motion.div
@@ -312,7 +321,7 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
                 </div>
                 <button
                   type="button"
-                  aria-label="Close showreel"
+                  aria-label={t.hero.showreelModal.closeLabel}
                   onClick={closeReel}
                   className="w-9 h-9 rounded-lg border border-white/15 bg-[#0b0c10] text-white hover:border-[#00E5FF] hover:text-[#00E5FF] flex items-center justify-center cursor-pointer transition-colors"
                 >
@@ -335,7 +344,7 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
                     src="https://assets.mixkit.co/videos/preview/mixkit-video-editing-on-a-computer-43093-large.mp4"
                   />
                 ) : (
-                  <ProceduralThumbnail src="placeholder:focuslist-ui" alt="f.cuts 2027 Showreel" />
+                  <ProceduralThumbnail src="placeholder:focuslist-ui" alt={t.hero.showreelModal.dialogLabel} />
                 )}
 
                 {!isPlaying && currentTime === 0 && (
@@ -343,12 +352,12 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
                     <button
                       type="button"
                       onClick={handlePlayPause}
-                      aria-label="Play showreel"
+                      aria-label={t.hero.showreelModal.playLabel}
                       className="w-16 h-16 rounded-full border border-[#00E5FF] bg-[#050505]/90 text-[#00E5FF] hover:bg-[#00E5FF] hover:text-[#050505] flex items-center justify-center transition-colors cursor-pointer mb-3"
                     >
                       <Play className="w-7 h-7 fill-current translate-x-[-1px]" />
                     </button>
-                    <p className="font-display font-bold text-lg text-white">F.CUTS 2027 SHOWREEL</p>
+                    <p className="font-display font-bold text-lg text-white">{t.hero.showreelModal.overlayTitle}</p>
                   </div>
                 )}
               </div>
@@ -381,7 +390,7 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
                     <button
                       id="studio-play-btn"
                       type="button"
-                      aria-label={isPlaying ? 'Pause showreel' : 'Play showreel'}
+                      aria-label={isPlaying ? t.hero.showreelModal.pauseLabel : t.hero.showreelModal.playLabel}
                       onClick={handlePlayPause}
                       className="w-10 h-10 rounded-lg bg-[#0b0c10] border border-white/15 hover:border-[#00E5FF] flex items-center justify-center text-[#00E5FF] cursor-pointer"
                     >
@@ -390,7 +399,7 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
                     <button
                       id="studio-mute-btn"
                       type="button"
-                      aria-label={isMuted ? 'Unmute showreel' : 'Mute showreel'}
+                      aria-label={isMuted ? t.hero.showreelModal.unmuteLabel : t.hero.showreelModal.muteLabel}
                       onClick={toggleMute}
                       className="w-10 h-10 rounded-lg bg-[#0b0c10] border border-white/15 hover:border-[#FF168B] flex items-center justify-center cursor-pointer"
                     >
@@ -408,7 +417,7 @@ export default function Hero({ onStartProject, onExploreWork }: HeroProps) {
                   </div>
                   <input
                     type="range"
-                    aria-label="Showreel timeline scrubber"
+                    aria-label={t.hero.showreelModal.scrubberLabel}
                     min={0}
                     max={duration || 60}
                     step={0.1}
