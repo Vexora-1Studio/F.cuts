@@ -70,10 +70,15 @@ export default function Scene3DCanvas() {
 
     container.appendChild(renderer.domElement);
 
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const envTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environment = envTexture;
-    pmremGenerator.dispose();
+    let envTexture: THREE.Texture | null = null;
+    try {
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      envTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+      scene.environment = envTexture;
+      pmremGenerator.dispose();
+    } catch {
+      envTexture = null;
+    }
 
     // Studio Lighting + Scroll-Reactive Cyan & Magenta Lights
     const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x050505, 0.55);
@@ -412,8 +417,17 @@ export default function Scene3DCanvas() {
     window.addEventListener('resize', onResize);
 
     if (!isSoftwareGl) {
-      renderer.compile(scene, camera);
+      try {
+        renderer.compile(scene, camera);
+      } catch {
+        // Ignore non-fatal pre-compilation errors across GPU drivers
+      }
     }
+
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+    };
+    renderer.domElement.addEventListener('webglcontextlost', handleContextLost);
 
     // =========================================================================
     // ANIMATION LOOP
@@ -423,20 +437,28 @@ export default function Scene3DCanvas() {
     let disposed = false;
 
     const afterDraw = (cb: () => void) => {
-      const gl = renderer.getContext() as WebGL2RenderingContext;
-      const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
-      gl.flush();
-      const poll = () => {
-        if (disposed) return;
-        const state = sync && gl.getSyncParameter(sync, gl.SYNC_STATUS);
-        if (state === gl.UNSIGNALED) {
-          frameId = window.setTimeout(poll, 5);
-        } else {
-          if (sync) gl.deleteSync(sync);
+      try {
+        const gl = renderer.getContext() as WebGL2RenderingContext | null;
+        if (!gl || typeof gl.fenceSync !== 'function') {
           frameId = window.setTimeout(cb, 80);
+          return;
         }
-      };
-      frameId = window.setTimeout(poll, 5);
+        const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        gl.flush();
+        const poll = () => {
+          if (disposed) return;
+          const state = sync && gl.getSyncParameter(sync, gl.SYNC_STATUS);
+          if (state === gl.UNSIGNALED) {
+            frameId = window.setTimeout(poll, 5);
+          } else {
+            if (sync) gl.deleteSync(sync);
+            frameId = window.setTimeout(cb, 80);
+          }
+        };
+        frameId = window.setTimeout(poll, 5);
+      } catch {
+        frameId = window.setTimeout(cb, 80);
+      }
     };
 
     const tick = () => {
@@ -538,7 +560,8 @@ export default function Scene3DCanvas() {
       matOpticalGlass.dispose();
       shardMat.dispose();
       prismWireMat.dispose();
-      envTexture.dispose();
+      if (envTexture) envTexture.dispose();
+      renderer.domElement.removeEventListener('webglcontextlost', handleContextLost);
       renderer.dispose();
 
       if (renderer.domElement.parentNode === container) {

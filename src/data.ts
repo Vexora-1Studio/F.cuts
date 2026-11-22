@@ -6,7 +6,7 @@ import { PortfolioItem, AIShowcaseItem, Service } from './types';
  */
 export const contactInfo = {
   brandName: 'f.cuts',
-  logoPath: '/assets/aistudio/image_6c7b35e0.png',
+  logoPath: `${import.meta.env.BASE_URL}assets/aistudio/image_6c7b35e0.png`,
   email: '', // أضف البريد الإلكتروني الرسمي هنا، مثال: hello@fcuts.studio
   phone: '', // أضف رقم الهاتف الرسمي هنا، مثال: +966500000000
   whatsapp: '', // أضف رقم الواتساب بصيغة دولية بدون + مثل: 966500000000
